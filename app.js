@@ -1,10 +1,8 @@
 'use strict'
 
+
 const path = require('path')
 const AutoLoad = require('@fastify/autoload')
-
-const optionDatabase = require ('./config')
-const knex = require('knex')(optionDatabase.database);
 
 
 module.exports = async function (fastify, opts) {
