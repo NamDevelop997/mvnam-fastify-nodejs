@@ -15,7 +15,7 @@ module.exports = {
           listUser = user;
         });
 
-      reply.send({ msg: data });
+      reply.send({ success: true, data });
     },
   },
 
@@ -46,7 +46,7 @@ module.exports = {
       if (Array.isArray(inforUser) && !inforUser.length) {
         return reply.status(404).send(new Error("User not found"));
       }
-      reply.send({ infor: inforUser });
+      reply.send({ success: true, data: inforUser });
     },
   },
 
@@ -54,10 +54,8 @@ module.exports = {
   add: {
     addNewUser: async(req, res) => {
        let dataUser = req.body;
-      
-      console.log(req.body);
      await knex("user").insert(dataUser).then( () =>{
-        res.status(200).send({msg : "Add new user success!"});
+        res.status(200).send({success : true, data: dataUser});
       });
     },
   },

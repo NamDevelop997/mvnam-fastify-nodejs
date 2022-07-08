@@ -16,9 +16,11 @@
   "license": "ISC",
   "dependencies": {
     "@fastify/autoload": "^5.0.0",
+    "@fastify/jwt": "^6.2.1",
     "@fastify/multipart": "^7.1.0",
     "@fastify/sensible": "^4.1.0",
     "fastify": "^4.0.0",
+    "fastify-auth": "^1.2.0",
     "fastify-cli": "^4.2.0",
     "fastify-plugin": "^3.0.0",
     "knex": "^2.1.0",
