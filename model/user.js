@@ -1,6 +1,6 @@
 const optionDatabase = require("../config");
 const knex = require("knex")(optionDatabase.database);
-
+const bcrypt = require("bcrypt");
 
 module.exports = {
   // Api get all users
@@ -9,7 +9,7 @@ module.exports = {
       let data = [];
       await knex
         .from("user")
-        .select(["id", "fullname", "gmail", "address", "phone", "level"])
+        .select(["id", "fullname", "gmail", "level"])
         .then((user) => {
           data = user;
           listUser = user;
@@ -35,7 +35,7 @@ module.exports = {
 
       if (id && data.length > 0) {
         await knex("user")
-          .select(["id", "fullname", "gmail", "address", "phone", "level"])
+          .select(["id", "fullname", "gmail", "level"])
           .where("id", "=", id)
           .then((data) => {
             inforUser = data;
@@ -54,6 +54,8 @@ module.exports = {
   add: {
     addNewUser: async(req, res) => {
        let dataUser = req.body;
+       dataUser.password = await bcrypt.hash(dataUser.password, 9);
+       
      await knex("user").insert(dataUser).then( () =>{
         res.status(200).send({success : true, data: dataUser});
       });
@@ -63,11 +65,9 @@ module.exports = {
   // Api edit infor user
   editUser: {
     getUserHandler: async (req, reply) => {
+      req.body.password =  bcrypt.hash(dataUpdate.password,9)
       let { id } = req.params;
       let dataUpdate = req.body;
-      
-      console.log(dataUpdate);
-      
       // Check id doesn't exist in database 
       let data = [];
       let inforUser;

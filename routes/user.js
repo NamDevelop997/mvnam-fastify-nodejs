@@ -1,4 +1,6 @@
 
+
+
 const userSchema = require ('../schema/user')
 const userModel = require ('../model/user')
 
@@ -18,15 +20,13 @@ const getIdDestroyUserSchema  = userSchema.deleteUserSchema.params;
 const destroyUserModel  = userModel.delete.deleteUserHandler;
 
 
-
-
 module.exports = async function (fastify, opts) {
  
   //Api list users
   fastify.get("/user",  getUserSchema, getListuserModel);
 
   // Api get infor user
-  fastify.get("/user/:id",  getIdUserSchema, getInforUserModel);
+  fastify.get("/user/:id",  getIdUserSchema,  getInforUserModel);
   
   // Api add new user
   fastify.post("/user/add",  addUserSchema, addNewUserModel);
@@ -38,4 +38,6 @@ module.exports = async function (fastify, opts) {
   // Api delete for user
   fastify.delete("/user/delete/:id",  getIdDestroyUserSchema, destroyUserModel);
 
+
+ 
 };

@@ -11,10 +11,8 @@ module.exports = {
             properties: {
               fullname: { type: "string" },
               gmail: { type: "string" },
-              address: { type: "string" },
-              phone: { type: "string" },
-              level: { type: "string" },
               password: { type: "string" },
+              level: { type: "string" },
             },
           },
         },
@@ -40,14 +38,13 @@ module.exports = {
   addUserSchema : {
     body: {
       type: 'array',
-      required: ['fullname', 'gmail', 'address', 'phone', 'level', 'password'],
+      required: ['fullname', 'gmail',  'password', 'level'],
       properties: {
         fullname: { type: "string" }, // recall we created typeString earlier
         gmail: { type: "string" },
-        address: { type: "string" },
-        phone: { type: "string" },
-        level: { type: "string" },
+       
         password: { type: "string" },
+        level: { type: "string" },
       },
     },
     response: {
@@ -58,14 +55,13 @@ module.exports = {
   editUserSchema : {
     body: {
       type: 'object',
-      required: ['fullname', 'gmail', 'address', 'phone', 'level', 'password'],
+      required: ['fullname', 'gmail','password', 'level'],
       properties: {
         fullname: { type: "string" }, // recall we created typeString earlier
         gmail: { type: "string" },
-        address: { type: "string" },
-        phone: { type: "string" },
-        level: { type: "string" },
+       
         password: { type: "string" },
+        level: { type: "string" },
       },
     },
     params: {
@@ -84,7 +80,7 @@ module.exports = {
   deleteUserSchema : {
     params: {
       id: { type: 'number' }, // converts the id param to number
-    },
+},
     response: {
       200:  { type: 'String'},
     },

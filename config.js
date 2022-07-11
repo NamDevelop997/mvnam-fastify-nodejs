@@ -1,4 +1,4 @@
-var mysql = require('mysql');
+
  
 module.exports = {
     name: 'rest-api',
@@ -15,6 +15,14 @@ module.exports = {
           password : '123456',
           database : 'hotel_manager',
         },
-    }
-    
+    },
+
+    secretKey :  (keyname) => {
+      
+      if (!keyname) {
+          throw new Error(`Configuration must include ${keyname}`)
+      }
+  
+      return keyname;
+  }
 }
