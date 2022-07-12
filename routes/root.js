@@ -11,7 +11,7 @@ module.exports = async function (fastify, opts) {
         onRequest: [fastify.authenticate]
     },
     async function (request, reply) {
-       return console.log(request);
+       reply.send({msg: "admin authentization"});
     }
 )
 }

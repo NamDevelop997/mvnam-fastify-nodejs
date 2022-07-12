@@ -29,7 +29,7 @@ module.exports = async function (fastify, opts) {
   fastify.get("/user/:id",  getIdUserSchema,  getInforUserModel);
   
   // Api add new user
-  fastify.post("/user/add",  addUserSchema, addNewUserModel);
+  fastify.post("/user/add",  addUserSchema,  addNewUserModel);
 
   
   // Api edit for user

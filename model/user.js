@@ -56,6 +56,7 @@ module.exports = {
        let dataUser = req.body;
        dataUser.password = await bcrypt.hash(dataUser.password, 9);
        
+       
      await knex("user").insert(dataUser).then( () =>{
         res.status(200).send({success : true, data: dataUser});
       });
@@ -65,9 +66,12 @@ module.exports = {
   // Api edit infor user
   editUser: {
     getUserHandler: async (req, reply) => {
-      req.body.password =  bcrypt.hash(dataUpdate.password,9)
-      let { id } = req.params;
       let dataUpdate = req.body;
+      
+      if(dataUpdate.password){
+        req.body.password =  await bcrypt.hash(dataUpdate.password,9)
+      }   
+      let { id } = req.params;
       // Check id doesn't exist in database 
       let data = [];
       let inforUser;
@@ -99,7 +103,7 @@ module.exports = {
           .where("id", "=", id)
           .update(dataUpdate)
           .then(() => {
-             return reply.status(200).send({ msg: `update user id = ${id} success`});
+             return reply.status(200).send({ success: true , msg: `update user id = ${id} success`});
           })
 
       } else {
@@ -145,7 +149,7 @@ module.exports = {
       .delete()
       .where("id", "=", id)
       .then(() => {
-        return reply.status(200).send ({msg: "delete successfully!"});
+        return reply.status(200).send ({success: true , msg: "delete successfully!"});
       })
     },
   }

@@ -1,5 +1,3 @@
-
-
 module.exports = {
   getAllUserSchema: {
     schema: {
@@ -9,7 +7,9 @@ module.exports = {
           items: {
             type: "object",
             properties: {
-              fullname: { type: "string" },
+              fullname: { type: "string" , errorMessage: {
+                type: 'Bad  full name name'
+              }},
               gmail: { type: "string" },
               password: { type: "string" },
               level: { type: "string" },
@@ -35,54 +35,56 @@ module.exports = {
     },
   },
 
-  addUserSchema : {
-    body: {
-      type: 'array',
-      required: ['fullname', 'gmail',  'password', 'level'],
-      properties: {
-        fullname: { type: "string" }, // recall we created typeString earlier
-        gmail: { type: "string" },
-       
-        password: { type: "string" },
-        level: { type: "string" },
+  addUserSchema: {
+    shema: {
+      body: {
+        type: "array",
+        required: ["fullname", "gmail", "password", "level"],
+        properties: {
+          fullname: { type: "string" }, // recall we created typeString earlier
+          gmail: { type: "string" },
+          password: { type: "string" },
+          level: { type: "string" },
+        },
       },
-    },
-    response: {
-      200: { type: "array" }, // sending a simple message as string
+      response: {
+        200: { type: "array" }, // sending a simple message as string
+      },
     },
   },
 
-  editUserSchema : {
+  editUserSchema: {
     body: {
-      type: 'object',
-      required: ['fullname', 'gmail','password', 'level'],
+      type: "object",
+      required: ["fullname", "gmail", "password", "level"],
       properties: {
         fullname: { type: "string" }, // recall we created typeString earlier
         gmail: { type: "string" },
-       
+
         password: { type: "string" },
         level: { type: "string" },
       },
     },
     params: {
-      id: { type: 'number' }, // converts the id param to number
+      id: { type: "number" }, // converts the id param to number
     },
     response: {
-      200: {// sending a simple message as string
-         type: "string",
-         properties: {
-          msg: { type: 'string' }
-        } 
-      }, 
+      200: {
+        // sending a simple message as string
+        type: "string",
+        properties: {
+          msg: { type: "string" },
+        },
+      },
     },
-  }, 
+  },
 
-  deleteUserSchema : {
+  deleteUserSchema: {
     params: {
-      id: { type: 'number' }, // converts the id param to number
-},
-    response: {
-      200:  { type: 'String'},
+      id: { type: "number" }, // converts the id param to number
     },
-  }
+    response: {
+      200: { type: "String" },
+    },
+  },
 };
