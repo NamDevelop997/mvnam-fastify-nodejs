@@ -11,6 +11,8 @@ const secretKey = require("./secretKey");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
+
+
 module.exports = async function (fastify, opts) {
   fastify.register(AutoLoad, {
     dir: path.join(__dirname, "plugins"),
@@ -74,7 +76,7 @@ module.exports = async function (fastify, opts) {
   });
 
   // Register
-  fastify.post("/api/register", async (req, replay) => {
+  fastify.post("/api/register",  async (req, replay) => {
     try {
       let { fullname, gmail, password } = req.body;
 
