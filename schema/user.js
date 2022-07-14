@@ -74,12 +74,34 @@ module.exports = {
           // sending a simple message as string
           type: "object",
           properties: {
-            success: { type: "bolean"},
+            success: {type: "boolean"},
             msg: { type: "string" },
           },
         },
       },
     }
+  },
+  
+  test : {
+    body: {
+      type: "object",
+      required: ["fullname", "gmail"],
+      properties: {
+        fullname: { type: "string", maxLength: 10, minLength: 5 }, // recall we created typeString earlier
+        gmail: { type: "string", maxLength: 50, minLength: 12 },
+      },
+    },
+    response: {
+      200: {
+        // sending a simple message as string
+        type: "object",
+        properties: {
+          success: { type: "boolean" },
+          error: { type: "string" },
+          message: { type: "string" },
+        },
+      },
+    },
   },
 
   deleteUserSchema: {

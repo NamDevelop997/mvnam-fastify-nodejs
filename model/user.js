@@ -53,7 +53,7 @@ module.exports = {
     // hash password
     password = await bcrypt.hash(password, 9);
 
-    // check gmail @gmail, @yahoo, @lookout ...
+    // check type gmail (@gmail, @yahoo, @lookout ...)
     let pattern = /([a-zA-Z0-9_.-]+)@([a-zA-Z]+)([\.])([a-zA-Z]+)/i;
     let checkMail = pattern.test(gmail);
 
@@ -170,4 +170,6 @@ module.exports = {
         });
     },
   },
+
+  
 };

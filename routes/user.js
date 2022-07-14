@@ -21,6 +21,8 @@ const editUserModel = userModel.editUser.getUserHandler;
 const getIdDestroyUserSchema = userSchema.deleteUserSchema.params;
 const destroyUserModel = userModel.delete.deleteUserHandler;
 
+
+
 module.exports = async function (fastify, opts) {
 
   //Api list users

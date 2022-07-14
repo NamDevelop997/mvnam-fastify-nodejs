@@ -4,13 +4,15 @@ const path = require("path");
 const AutoLoad = require("@fastify/autoload");
 
 const optionDatabase = require("./config");
+const testSChe = require("./schema/user");
+const check = require("./services/check");
 
 const knex = require("knex")(optionDatabase.database);
 
 const secretKey = require("./secretKey");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-
+const { log } = require("console");
 
 
 module.exports = async function (fastify, opts) {
@@ -26,6 +28,19 @@ module.exports = async function (fastify, opts) {
     options: Object.assign({}, opts),
   });
 
+  fastify.post("/testing",
+    {
+      schema: testSChe.test,
+      preHandler: check.checkFormMail,
+      onRequest : function(req, res, next) {
+        console.log("test onRquest");
+        // next()
+      }
+    },
+    async (req, res) => {
+      res.send({ success: true, message: "test ok" });
+    }
+  );
   // Login
   fastify.post("/api/signup", async (req, reply) => {
     let { email, password } = req.body;
@@ -76,7 +91,7 @@ module.exports = async function (fastify, opts) {
   });
 
   // Register
-  fastify.post("/api/register",  async (req, replay) => {
+  fastify.post("/api/register", async (req, replay) => {
     try {
       let { fullname, gmail, password } = req.body;
 
