@@ -1,21 +1,42 @@
-const optionDatabase = require("../config");
-const knex = require("knex")(optionDatabase.database);
+
 const bcrypt = require("bcrypt");
 const log = require("fastify-cli/log");
+
+const optionDatabase = require("../config");
+const knex = require("knex")(optionDatabase.database);
+const paramsHelper = require("./../helpers/getParams")
 
 module.exports = {
   // Api get all users
   getAllUsers: async (req, reply) => {
+    console.log(parseInt(req.query.page));
+    
+    var reqData = req.query;
+    console.log(reqData);
+    
+    var pagination = {};
+    var per_page = parseInt(reqData.page) || 1;
+    var page = parseInt(reqData.current_page) || 1;
+    if (page < 1) page = 1;
+    var offset = (page - 1) * per_page;
+   
+     
+    let totalItemPerPage = 2;
+
     let data = [];
     await knex
       .from("user")
       .select(["id", "fullname", "gmail", "level"])
+      .limit (totalItemPerPage)
+      .offset (offset)
       .then((user) => {
         data = user;
         listUser = user;
       });
 
     reply.send({ success: true, data });
+
+
   },
 
   // Api get infor user
@@ -65,7 +86,7 @@ module.exports = {
         reply.send({ success: false, message: "account is already in use" });
       } else {
         await knex("user")
-          .insert(req.body)
+          .insert({ fullname, gmail, password, level })
           .then(() => {
             reply.send({
               success: true,
@@ -73,103 +94,91 @@ module.exports = {
             });
           });
       }
-    }else{
-      reply.send({ success: false, message: `Email is not in the correct format! (ex: @email, @yahoo, @outlook...)` });
-
+    } else {
+      reply.send({
+        success: false,
+        message: `Email is not in the correct format! (ex: @email, @yahoo, @outlook...)`,
+      });
     }
   },
 
   // Api edit infor user
-  editUser: {
-    getUserHandler: async (req, reply) => {
-      let dataUpdate = req.body;
+  editUser: async (req, reply) => {
+    let dataUpdate = req.body;
+    let { id } = req.params;
+    let inforUser;
 
-      if (dataUpdate.password) {
-        req.body.password = await bcrypt.hash(dataUpdate.password, 9);
-      }
-      
-      let { id } = req.params;
-      // Check id doesn't exist in database
-      let data = [];
-      let inforUser;
-
-      await knex
-        .from("user")
-        .select("*")
-        .then((user) => {
-          data = user;
+    //Check Id user
+    if (id) {
+      await knex("user")
+        .select(["fullname", "gmail", "level"])
+        .where("id", "=", id)
+        .then((data) => {
+          inforUser = data;
         });
+    } else {
+      return reply.status(404).send(new Error(`User id = ${id} not found`));
+    }
+    // End check id
 
-      if (id && data.length > 0) {
-        await knex("user")
-          .select("*")
-          .where("id", "=", id)
-          .then((data) => {
-            inforUser = data;
-          });
+    // Check inforUser and inforUser is null
+    if (Array.isArray(inforUser) && !inforUser.length) {
+      return reply.status(404).send(new Error(`User id = ${id} not found`));
+    }
+
+    // Update user with id
+    if (id != undefined && dataUpdate !== undefined) {
+      //Check gmail Type
+      let pattern = /([a-zA-Z0-9_.-]+)@([a-zA-Z]+)([\.])([a-zA-Z]+)/i;
+      let checkMail = pattern.test(dataUpdate.gmail);
+      if (!checkMail) {
+        reply.send({
+          success: false,
+          msg: `Email is not in the correct format! (ex: @email, @yahoo, @outlook...)`,
+        });
       } else {
-        return reply.status(404).send(new Error(`User id = ${id} not found`));
-      }
-      if (Array.isArray(inforUser) && !inforUser.length) {
-        return reply.status(404).send(new Error(`User id = ${id} not found`));
-      }
-
-      // update user with id
-      if (id != undefined && dataUpdate !== undefined) {
         await knex("user")
           .where("id", "=", id)
           .update(dataUpdate)
           .then(() => {
-            return reply
-              .send({ success: true, msg: `update user id = ${id} success` });
+            return reply.send({
+              success: true,
+              msg: `update user id = ${id} success`,
+            });
           });
-      } else {
-        return reply.status(404).send(new Error(`User id = ${id} not found`));
       }
-
-      reply.send({ success: true, msg: `update user with id = ${id} success` });
-    },
+      // End check Gmail type
+    } else {
+      return reply.status(404).send(new Error(`User id = ${id} not found`));
+    }
   },
 
-  delete: {
-    deleteUserHandler: async (req, reply) => {
-      let { id } = req.params;
-      //Check id doesnt exist in database
-      let data = [];
-      let inforUser;
+  delete: async (req, reply) => {
+    let { id } = req.params;
 
-      await knex
-        .from("user")
-        .select("*")
-        .then((user) => {
-          data = user;
-        });
+    let inforUser;
 
-      if (id && data.length > 0) {
-        await knex("user")
-          .select("*")
-          .where("id", "=", id)
-          .then((data) => {
-            inforUser = data;
-          });
-      } else {
-        return reply.status(404).send(new Error(`User id = ${id} not found`));
-      }
-      if (Array.isArray(inforUser) && !inforUser.length) {
-        return reply.status(404).send(new Error(`User id = ${id} not found`));
-      }
-
-      // Delete user
+    //Check id doesnt exist in database
+    if (id) {
       await knex("user")
-        .delete()
+        .select(["fullname", "gmail", "level"])
         .where("id", "=", id)
-        .then(() => {
-          return reply
-            .status(200)
-            .send({ success: true, msg: "delete successfully!" });
+        .then((data) => {
+          inforUser = data;
         });
-    },
-  },
+    } else {
+      return reply.status(404).send(new Error(`User id = ${id} not found`));
+    }
+    if (Array.isArray(inforUser) && !inforUser.length) {
+      return reply.status(404).send(new Error(`User id = ${id} not found`));
+    }
 
-  
+    // Delete user
+    await knex("user")
+      .delete()
+      .where("id", "=", id)
+      .then(() => {
+        return reply.send({ success: "dsa", msg: "delete successfully!" });
+      });
+  },
 };

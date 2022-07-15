@@ -6,37 +6,37 @@ require("ajv-errors")(ajv /*, {singleError: true} */);
 const userSchema = require("../schema/user");
 const userModel = require("../model/user");
 
-const getUserSchema = userSchema.getAllUserSchema;
+const listUsers = userSchema.getAllUserSchema;
 const getListuserModel = userModel.getAllUsers;
 
-const getInforUserSchema = userSchema.showInforUerSchema;
+const inforUser = userSchema.showInforUerSchema;
 const getInforUserModel = userModel.showInforUser;
 
-const addUserSchema = userSchema.addUserSchema;
+const addUser = userSchema.addUserSchema;
 const addNewUserModel = userModel.add;
 
-const editUserSchema = userSchema.editUserSchema;
-const editUserModel = userModel.editUser.getUserHandler;
+const editUser= userSchema.editUserSchema;
+const editUserModel = userModel.editUser;
 
-const getIdDestroyUserSchema = userSchema.deleteUserSchema.params;
-const destroyUserModel = userModel.delete.deleteUserHandler;
+const delUser = userSchema.deleteUserSchema;
+const destroyUserModel = userModel.delete;
 
 
 
 module.exports = async function (fastify, opts) {
 
   //Api list users
-  fastify.get("/user", getUserSchema, getListuserModel);
+  fastify.get("/user/", {schema: listUsers}, getListuserModel);
 
   // Api get infor user
-  fastify.get("/user/:id", getInforUserSchema , getInforUserModel);
+  fastify.get("/user/:id", {schema : inforUser}, getInforUserModel);
 
   // Api add new user
-  fastify.post("/user/add", addUserSchema, addNewUserModel);
+  fastify.post("/user/add", {schema: addUser}, addNewUserModel);
 
   // Api edit for user
-  fastify.put("/user/edit/:id", editUserSchema , editUserModel);
+  fastify.put("/user/edit/:id", {schema: editUser} , editUserModel);
 
   // Api delete for user
-  fastify.delete("/user/delete/:id", getIdDestroyUserSchema, destroyUserModel);
+  fastify.delete("/user/delete/:id", {schema: delUser}, destroyUserModel);
 };

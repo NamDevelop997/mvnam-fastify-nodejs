@@ -28,19 +28,6 @@ module.exports = async function (fastify, opts) {
     options: Object.assign({}, opts),
   });
 
-  fastify.post("/testing",
-    {
-      schema: testSChe.test,
-      preHandler: check.checkFormMail,
-      onRequest : function(req, res, next) {
-        console.log("test onRquest");
-        // next()
-      }
-    },
-    async (req, res) => {
-      res.send({ success: true, message: "test ok" });
-    }
-  );
   // Login
   fastify.post("/api/signup", async (req, reply) => {
     let { email, password } = req.body;
