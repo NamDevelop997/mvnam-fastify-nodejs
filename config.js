@@ -16,6 +16,8 @@ module.exports = {
           database : 'hotel_manager',
         },
     },
+    email:    'namyoutubi997@gmail.com',
+    passGmail : 'owondfzbhibxoqmf',
 
     secretKey :  (keyname) => {
       

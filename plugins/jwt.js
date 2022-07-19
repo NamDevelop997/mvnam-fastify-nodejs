@@ -16,13 +16,10 @@ module.exports = fp(function (fastify, opts, done) {
         }
     })
 
-    // fastify.decorate("checkRoleUser", async function (request, reply, next) {
-    //     try {
-    //         await request.jwtVerify()
-    //     } catch (err) {
-    //         reply.send(err) 
-    //     }
-    // })
-
+    fastify.decorate("checkRoleUser", async function (request, reply, next) {
+       console.log(`12`);
+       next();
+    })
     done()
+    
 })

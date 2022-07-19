@@ -24,18 +24,21 @@ const editUserPassWordModel = userModel.updatePassword;
 const delUser = userSchema.deleteUserSchema;
 const destroyUserModel = userModel.delete;
 
+// const tokenSchema = userSchema.tokenSchema;
+// const verifyGmail = userModel.verifyGmail;
+
 
 
 module.exports = async function (fastify, opts) {
 
   //Api list users
-  fastify.get("/user/", {schema: listUsers}, getListuserModel);
+  fastify.get("/user/", {schema: listUsers, preHandler: fastify.test}, getListuserModel);
 
   // Api get infor user
   fastify.get("/user/:id", {schema : inforUser}, getInforUserModel);
 
   // Api add new user
-  fastify.post("/user/add", {schema: addUser}, addNewUserModel);
+  fastify.post("/user/add", {schema: addUser, preHandler: fastify.sendMail}, addNewUserModel);
 
   // Api edit for user
   fastify.put("/user/edit/:id", {schema: editUser} , editUserModel);
@@ -45,4 +48,7 @@ module.exports = async function (fastify, opts) {
 
   // Api delete for user
   fastify.delete("/user/delete/:id", {schema: delUser}, destroyUserModel);
+
+  //Verify email 
+  // fastify.delete("/user/verify/:token", {schema: tokenSchema}, verifyGmail);
 };

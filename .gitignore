@@ -3,7 +3,8 @@ logs
 *.log
 npm-debug.log*
 
-.secretKey
+.secretKey.js
+.config.js
 # Runtime data
 pids
 *.pid

@@ -1,7 +1,6 @@
 const bcrypt = require("bcrypt");
 const log = require("fastify-cli/log");
 
-
 const optionDatabase = require("../config");
 const knex = require("knex")(optionDatabase.database);
 const paramsHelper = require("./../helpers/getParams");
@@ -92,7 +91,7 @@ module.exports = {
             gmail: gmail,
             password: hashPassword,
             level: level,
-            status: status,
+            status: "inactive",
           };
           await knex("user")
             .insert(dataUser)
@@ -164,7 +163,7 @@ module.exports = {
 
   updatePassword: async (req, reply) => {
     let { password_old, password_new, password_confirm } = req.body;
-    
+
     let { id } = req.params;
     let dataPassword;
 
@@ -179,42 +178,44 @@ module.exports = {
     } else {
       return reply.status(404).send(new Error(`User id = ${id} not found`));
     }
- 
 
-    if (id !== undefined &&  req.body !== undefined && dataPassword.length > 0) {
+    if (id !== undefined && req.body !== undefined && dataPassword.length > 0) {
       //Check password
-      let hashPassword = await bcrypt.compare(password_old, dataPassword[0].password);
-      
+      let hashPassword = await bcrypt.compare(
+        password_old,
+        dataPassword[0].password
+      );
+
       if (hashPassword) {
         if (password_new === password_confirm) {
           //Hash password changed
           password_new = await bcrypt.hash(password_confirm, 9);
-          let dataPasswordUpdate = {password: password_new};
+          let dataPasswordUpdate = { password: password_new };
 
           //Update password
           await knex("user")
-          .where("id", "=", id)
-          .update(dataPasswordUpdate)
-          .then(() => {
-            return reply.send({
-              success: true,
-              message: `update password for id = ${id} success`,
+            .where("id", "=", id)
+            .update(dataPasswordUpdate)
+            .then(() => {
+              return reply.send({
+                success: true,
+                message: `update password for id = ${id} success`,
+              });
             });
+        } else {
+          reply.send({
+            success: false,
+            message: "wrong confirmation password!",
           });
-        }else{
-           reply.send({success: false, message: "wrong confirmation password!"})
-
         }
-        
-      }else{
-        reply.send({success: false, message: "Wrong old password!"})
+      } else {
+        reply.send({ success: false, message: "Wrong old password!" });
       }
-      
+
       // End check Gmail type
     } else {
       return reply.status(404).send(new Error(`User id = ${id} not found`));
     }
-
   },
 
   delete: async (req, reply) => {

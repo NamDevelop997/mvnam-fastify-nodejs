@@ -2,10 +2,9 @@
 
 const path = require("path");
 const AutoLoad = require("@fastify/autoload");
+const nodemailer = require('nodemailer');
 
 const optionDatabase = require("./config");
-const testSChe = require("./schema/user");
-
 
 const knex = require("knex")(optionDatabase.database);
 
@@ -21,12 +20,38 @@ module.exports = async function (fastify, opts) {
     options: Object.assign({}, opts),
   });
 
+
   // This loads all plugins defined in routes
   // define your routes in one of these
   fastify.register(AutoLoad, {
     dir: path.join(__dirname, "routes"),
     options: Object.assign({}, opts),
   });
+
+fastify.get("/send", (req, reply) => {
+  var transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: 'namyoutubi997@gmail.com',
+      pass: 'owondfzbhibxoqmf'
+    }
+  });
+  
+  var mailOptions = {
+    to: 'mvnam997@gmail.com',
+    subject: 'Title gmail',
+    html: `<h1>This is a test page.</h1>
+            <a href="http://127.0.0.1:3000/admin/user/verify/">Link </a>`
+  };
+  
+  transporter.sendMail(mailOptions, function(error, info){
+    if (error) {
+      reply.send({error});
+    } else {
+      reply.send('Email sent: ' + info.response);
+    }
+  });
+})
 
   // Login
   fastify.post("/api/login", async (req, reply) => {
@@ -47,7 +72,6 @@ module.exports = async function (fastify, opts) {
           .then((data) => {
             user = data;
           });
-        console.log(user);
 
         if (user.length == 1) {
           let hashPassword = await bcrypt.compare(password, user[0].password);
@@ -76,6 +100,8 @@ module.exports = async function (fastify, opts) {
       reply.send({ err: error });
     }
   });
+
+  
 
   fastify.register(require("./routes/user"), { prefix: "/admin/api" });
 };
