@@ -6,6 +6,7 @@ module.exports = {
         properties: {
           success: { type: "boolean" },
           data: { type: "array" },
+         
         },
       },
     },

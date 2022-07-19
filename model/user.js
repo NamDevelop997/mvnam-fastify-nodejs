@@ -1,42 +1,39 @@
-
 const bcrypt = require("bcrypt");
 const log = require("fastify-cli/log");
 
 const optionDatabase = require("../config");
 const knex = require("knex")(optionDatabase.database);
-const paramsHelper = require("./../helpers/getParams")
+const paramsHelper = require("./../helpers/getParams");
 
 module.exports = {
   // Api get all users
   getAllUsers: async (req, reply) => {
-    console.log(parseInt(req.query.page));
-    
-    var reqData = req.query;
-    console.log(reqData);
-    
-    var pagination = {};
-    var per_page = parseInt(reqData.page) || 1;
-    var page = parseInt(reqData.current_page) || 1;
-    if (page < 1) page = 1;
-    var offset = (page - 1) * per_page;
-   
-     
-    let totalItemPerPage = 2;
-
     let data = [];
-    await knex
-      .from("user")
+    let ObjWhere = {};
+    let getPageOnURL = paramsHelper(req.query, "page", 1);
+    let getFullName = paramsHelper(req.query, "fullname", "");
+    let getGmail = paramsHelper(req.query, "gmail", "");
+    if (getPageOnURL === "" || getPageOnURL < 1) getPageOnURL = 1;
+    // if (getKeywords !== "") ObjWhere = {fullname : { $regex: getKeywords, $options: "i" }};
+   console.log(ObjWhere);
+
+    let panigations = {
+      totalItemsPerpage: 15,
+      currentPage: getPageOnURL,
+      pageRanges: 5,
+    };
+
+    await knex("user")
       .select(["id", "fullname", "gmail", "level"])
-      .limit (totalItemPerPage)
-      .offset (offset)
+      .limit(panigations.totalItemsPerpage)
+      .offset((panigations.currentPage - 1) * panigations.totalItemsPerpage)
+      .where('fullname', 'like', `%${getFullName}%`)  
+      .where('gmail', 'like', `%${getGmail}%`)  
       .then((user) => {
         data = user;
-        listUser = user;
       });
 
     reply.send({ success: true, data });
-
-
   },
 
   // Api get infor user
