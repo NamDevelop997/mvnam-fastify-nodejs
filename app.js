@@ -5,7 +5,7 @@ const AutoLoad = require("@fastify/autoload");
 
 const optionDatabase = require("./config");
 const testSChe = require("./schema/user");
-const check = require("./services/check");
+
 
 const knex = require("knex")(optionDatabase.database);
 
@@ -29,7 +29,7 @@ module.exports = async function (fastify, opts) {
   });
 
   // Login
-  fastify.post("/api/signup", async (req, reply) => {
+  fastify.post("/api/login", async (req, reply) => {
     let { email, password } = req.body;
 
     try {
@@ -74,46 +74,6 @@ module.exports = async function (fastify, opts) {
       }
     } catch (error) {
       reply.send({ err: error });
-    }
-  });
-
-  // Register
-  fastify.post("/api/register", async (req, replay) => {
-    try {
-      let { fullname, gmail, password } = req.body;
-
-      if (!fullname || !gmail || !password) {
-        replay.send({
-          success: false,
-          msg: "Please fill the field",
-        });
-      } else {
-        const is_gmail = await knex("user")
-          .select("gmail")
-          .where("gmail", gmail);
-
-        if (is_gmail.length == 1) {
-          replay.send({
-            success: false,
-            msg: "Email already exist",
-          });
-        } else {
-          const hashPassword = await bcrypt.hash(password, 9);
-          const dataUser = {
-            fullname: fullname,
-            gmail: gmail,
-            password: hashPassword,
-            level: "staff",
-          };
-          await knex("user")
-            .insert(dataUser)
-            .then(() => {
-              replay.status(200).send({ success: true, data: dataUser });
-            });
-        }
-      }
-    } catch (error) {
-      replay.send("error " + error.message);
     }
   });
 

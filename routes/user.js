@@ -18,6 +18,9 @@ const addNewUserModel = userModel.add;
 const editUser= userSchema.editUserSchema;
 const editUserModel = userModel.editUser;
 
+const editUserPassword = userSchema.editPassword;
+const editUserPassWordModel = userModel.updatePassword;
+
 const delUser = userSchema.deleteUserSchema;
 const destroyUserModel = userModel.delete;
 
@@ -36,6 +39,9 @@ module.exports = async function (fastify, opts) {
 
   // Api edit for user
   fastify.put("/user/edit/:id", {schema: editUser} , editUserModel);
+
+  //Api update password
+  fastify.put("/user/edit_password/:id", {schema: editUserPassword} , editUserPassWordModel);
 
   // Api delete for user
   fastify.delete("/user/delete/:id", {schema: delUser}, destroyUserModel);
