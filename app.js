@@ -7,7 +7,6 @@ const nodemailer = require("nodemailer");
 const optionDatabase = require("./config");
 const knex = require("knex")(optionDatabase.database);
 
-
 const secretKey = require("./secretKey");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");

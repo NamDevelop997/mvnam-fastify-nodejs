@@ -32,22 +32,22 @@ const destroyUserModel = userModel.delete;
 module.exports = async function (fastify, opts) {
 
   //Api list users
-  fastify.get("/user/", {schema: listUsers, preHandler: fastify.checkRoleUser1 }, getListuserModel);
+  fastify.get("/user/", {schema: listUsers, }, getListuserModel);
 
   // Api get infor user
-  fastify.get("/user/:id", {schema : inforUser,preHandler: fastify.checkRoleUser1  }, getInforUserModel);
+  fastify.get("/user/:id", {schema : inforUser,  }, getInforUserModel);
 
   // Api add new user
-  fastify.post("/user/add", {schema: addUser, preHandler: fastify.checkRoleUser1 }, addNewUserModel);
+  fastify.post("/user/add", {schema: addUser,}, addNewUserModel);
 
   // Api edit for user
-  fastify.put("/user/edit/:id", {schema: editUser, preHandler: fastify.checkRoleUser1 } , editUserModel);
+  fastify.put("/user/edit/:id", {schema: editUser,  } , editUserModel);
 
   //Api update password
   fastify.put("/user/edit_password/:id", {schema: editUserPassword, } , editUserPassWordModel);
 
   // Api delete for user
-  fastify.delete("/user/delete/:id", {schema: delUser, preHandler: fastify.checkRoleUser1 }, destroyUserModel);
+  fastify.delete("/user/delete/:id", {schema: delUser, }, destroyUserModel);
 
   //Verify email 
   // fastify.delete("/user/verify/:token", {schema: tokenSchema}, verifyGmail);

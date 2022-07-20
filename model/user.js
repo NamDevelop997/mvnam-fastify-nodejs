@@ -18,25 +18,36 @@ module.exports = {
     let getPageOnURL = paramsHelper(req.query, "page", 1);
     let getFullName = paramsHelper(req.query, "fullname", "");
     let getGmail = paramsHelper(req.query, "gmail", "");
+    let getLevel = paramsHelper(req.query, "level", "");
+    let getStatus = paramsHelper(req.query, "status", "");
 
     if (getPageOnURL === "" || getPageOnURL < 1) getPageOnURL = 1;
 
     let panigations = {
+      totalItems : 1,
       itemPerpage: 15,
       currentPage: getPageOnURL,
       pageRanges: 5,
-      
+
     };
 
     await knex("user")
       .select(["id", "fullname", "gmail", "level", "status"])
       .limit(panigations.itemPerpage)
       .offset((panigations.currentPage - 1) * panigations.itemPerpage)
-      .where("fullname", "like", `%${getFullName}%`)
-      .where("gmail", "like", `%${getGmail}%`)
+      .whereLike('gmail', `%${getGmail}%`)
+      .andWhereLike('fullname', `%${getFullName}%`)
+      .andWhereLike('level', `%${getLevel}%`)
+      .andWhereLike('status', `%${getStatus}%`)
       .then((user) => {
         data = user;
       });
+      console.log(data.length);
+      
+
+      panigations.totalItems = data.length;
+      
+      
 
     // Check data response
     if (data.length == 0)
