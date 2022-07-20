@@ -6,6 +6,7 @@ module.exports = {
         properties: {
           success: { type: "boolean" },
           data: { type: "array" },
+          
         },
       },
     },
@@ -32,7 +33,7 @@ module.exports = {
       required: ["fullname", "gmail", "password", "level"],
       properties: {
         fullname: { type: "string", maxLength: 50, minLength: 5 }, // recall we created typeString earlier
-        gmail: { type: "string", maxLength: 50, minLength: 12 },
+        gmail: { type: "string", maxLength: 50, minLength: 12 , pattern : "([a-zA-Z0-9_.-]+)@([a-zA-Z]+)([\\.])([a-zA-Z]+)",},
         password: { type: "string", maxLength: 15, minLength: 6 },
         level: { type: "string", maxLength: 15, minLength: 3 },
       },

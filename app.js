@@ -2,24 +2,23 @@
 
 const path = require("path");
 const AutoLoad = require("@fastify/autoload");
-const nodemailer = require('nodemailer');
+const nodemailer = require("nodemailer");
 
 const optionDatabase = require("./config");
-
 const knex = require("knex")(optionDatabase.database);
+
 
 const secretKey = require("./secretKey");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { log } = require("console");
-
+const paramsHelper = require("./helpers/getParams");
 
 module.exports = async function (fastify, opts) {
   fastify.register(AutoLoad, {
     dir: path.join(__dirname, "plugins"),
     options: Object.assign({}, opts),
   });
-
 
   // This loads all plugins defined in routes
   // define your routes in one of these
@@ -28,30 +27,37 @@ module.exports = async function (fastify, opts) {
     options: Object.assign({}, opts),
   });
 
-fastify.get("/send", (req, reply) => {
-  var transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-      user: 'namyoutubi997@gmail.com',
-      pass: 'owondfzbhibxoqmf'
+  fastify.get("/verify_gmail", {schema: { params : {token :{type: "string"}}}}, async (req, reply) => {
+    let token = paramsHelper(req.query, "token", "");
+    let dataUser = [];
+    let update = { token: null, status: 'active'}
+
+    // Find user have token on params
+    await knex('user')
+      .select('id','fullname', "gmail", "level", "status")
+      .where("token",token)
+      .then( (data)=>{
+        dataUser = data;
+      })
+
+    if(dataUser.length > 0) {
+      // Update status for user  
+        await knex('user')
+        .where("id", dataUser[0].id)
+        .update(update )
+        .then(() => {
+          return reply.send({
+            success: true,
+            msg: `update user id = ${dataUser[0].id} success`,
+          });
+        });
+
     }
+    
+      reply.send({dataUser});
+    
   });
-  
-  var mailOptions = {
-    to: 'mvnam997@gmail.com',
-    subject: 'Title gmail',
-    html: `<h1>This is a test page.</h1>
-            <a href="http://127.0.0.1:3000/admin/user/verify/">Link </a>`
-  };
-  
-  transporter.sendMail(mailOptions, function(error, info){
-    if (error) {
-      reply.send({error});
-    } else {
-      reply.send('Email sent: ' + info.response);
-    }
-  });
-})
+
 
   // Login
   fastify.post("/api/login", async (req, reply) => {
@@ -65,19 +71,21 @@ fastify.get("/send", (req, reply) => {
         });
       } else {
         let user = [];
-        await knex
-          .from("user")
+        await knex("user")
           .select(["id", "fullname", "gmail", "level", "password"])
           .where("gmail", "=", email)
           .then((data) => {
             user = data;
           });
 
+    
+          
         if (user.length == 1) {
           let hashPassword = await bcrypt.compare(password, user[0].password);
           if (hashPassword) {
-            const payload = { id: user.id };
-            const token = jwt.sign({ payload }, secretKey.keySecret);
+            const payload = { id: user[0].id , level: user[0].level};
+          
+            const token = jwt.sign(payload , secretKey.keySecret);
             reply.send({
               success: true,
               msg: "Login Successfully",
@@ -101,7 +109,5 @@ fastify.get("/send", (req, reply) => {
     }
   });
 
-  
-
-  fastify.register(require("./routes/user"), { prefix: "/admin/api" });
+  fastify.register(require("./routes/admin"), { prefix: "/admin/api" });
 };

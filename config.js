@@ -18,9 +18,9 @@ module.exports = {
     },
     email:    'namyoutubi997@gmail.com',
     passGmail : 'owondfzbhibxoqmf',
+    secretKeyToken : 'mvnam997',
 
-    secretKey :  (keyname) => {
-      
+    secretKey :  (keyname) => {   
       if (!keyname) {
           throw new Error(`Configuration must include ${keyname}`)
       }

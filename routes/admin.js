@@ -32,22 +32,22 @@ const destroyUserModel = userModel.delete;
 module.exports = async function (fastify, opts) {
 
   //Api list users
-  fastify.get("/user/", {schema: listUsers, preHandler: fastify.test}, getListuserModel);
+  fastify.get("/user/", {schema: listUsers, preHandler: fastify.checkRoleUser1 }, getListuserModel);
 
   // Api get infor user
-  fastify.get("/user/:id", {schema : inforUser}, getInforUserModel);
+  fastify.get("/user/:id", {schema : inforUser,preHandler: fastify.checkRoleUser1  }, getInforUserModel);
 
   // Api add new user
-  fastify.post("/user/add", {schema: addUser, preHandler: fastify.sendMail}, addNewUserModel);
+  fastify.post("/user/add", {schema: addUser, preHandler: fastify.checkRoleUser1 }, addNewUserModel);
 
   // Api edit for user
-  fastify.put("/user/edit/:id", {schema: editUser} , editUserModel);
+  fastify.put("/user/edit/:id", {schema: editUser, preHandler: fastify.checkRoleUser1 } , editUserModel);
 
   //Api update password
-  fastify.put("/user/edit_password/:id", {schema: editUserPassword} , editUserPassWordModel);
+  fastify.put("/user/edit_password/:id", {schema: editUserPassword, } , editUserPassWordModel);
 
   // Api delete for user
-  fastify.delete("/user/delete/:id", {schema: delUser}, destroyUserModel);
+  fastify.delete("/user/delete/:id", {schema: delUser, preHandler: fastify.checkRoleUser1 }, destroyUserModel);
 
   //Verify email 
   // fastify.delete("/user/verify/:token", {schema: tokenSchema}, verifyGmail);

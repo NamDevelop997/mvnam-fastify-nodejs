@@ -1,9 +1,15 @@
 const bcrypt = require("bcrypt");
 const log = require("fastify-cli/log");
+const jwt = require("jsonwebtoken");
+const nodemailer = require('nodemailer');
+
+
 
 const optionDatabase = require("../config");
 const knex = require("knex")(optionDatabase.database);
 const paramsHelper = require("./../helpers/getParams");
+const secretKey = require("../config");
+const { default: fastify } = require("fastify");
 
 module.exports = {
   // Api get all users
@@ -16,15 +22,16 @@ module.exports = {
     if (getPageOnURL === "" || getPageOnURL < 1) getPageOnURL = 1;
 
     let panigations = {
-      totalItemsPerpage: 15,
+      itemPerpage: 15,
       currentPage: getPageOnURL,
       pageRanges: 5,
+      
     };
 
     await knex("user")
       .select(["id", "fullname", "gmail", "level", "status"])
-      .limit(panigations.totalItemsPerpage)
-      .offset((panigations.currentPage - 1) * panigations.totalItemsPerpage)
+      .limit(panigations.itemPerpage)
+      .offset((panigations.currentPage - 1) * panigations.itemPerpage)
       .where("fullname", "like", `%${getFullName}%`)
       .where("gmail", "like", `%${getGmail}%`)
       .then((user) => {
@@ -70,7 +77,7 @@ module.exports = {
   // Api add user
   add: async (req, reply) => {
     try {
-      let { fullname, gmail, password, level, status } = req.body;
+      let { fullname, gmail, password, level} = req.body;
       let is_gmail;
 
       let pattern = /([a-zA-Z0-9_.-]+)@([a-zA-Z]+)([\.])([a-zA-Z]+)/i;
@@ -85,6 +92,8 @@ module.exports = {
             message: "Email already exist",
           });
         } else {
+          // Token = fullname + secretKey
+          let createToken = jwt.sign({ fullname }, secretKey.secretKeyToken); 
           let hashPassword = await bcrypt.hash(password, 9);
           let dataUser = {
             fullname: fullname,
@@ -92,17 +101,43 @@ module.exports = {
             password: hashPassword,
             level: level,
             status: "inactive",
+            token: createToken,
           };
+          //Insert to database
           await knex("user")
             .insert(dataUser)
             .then(() => {
+              let transporter = nodemailer.createTransport({
+                service: 'gmail',
+                auth: {
+                  user: 'namyoutubi997@gmail.com',
+                  pass: 'owondfzbhibxoqmf'
+                }
+              });
+              
+              let mailOptions = {
+                to: req.body.gmail,
+                subject: 'VERIFY EMAIL',
+                html: `<h1>Hi ${fullname}!</h1>
+                        <p>Thank you for subscribing website my us.</p>
+                        <p>Please press confirm your account</p>
+                        <a href="http://127.0.0.1:3000/verify_gmail?token=${createToken}">CLICK VERIFY YOUR EMAIL! </a>`
+              };
+              
+              transporter.sendMail(mailOptions, function(error, info){
+                if (error) {
+                  reply.send({error});
+                } 
+              });
               reply.send({ success: true, message: "Add user successfully!" });
             });
+          
+            
         }
       } else {
         reply.send({
           success: false,
-          message: "Non-gmail format(Ex: @gmail, @yahoo, @outlook...)",
+          message: "Gmail format(Ex: @gmail, @yahoo, @outlook...)",
         });
       }
     } catch (error) {
@@ -199,7 +234,7 @@ module.exports = {
             .then(() => {
               return reply.send({
                 success: true,
-                message: `update password for id = ${id} success`,
+                message: `Update password for id = ${id} success`,
               });
             });
         } else {
@@ -225,8 +260,8 @@ module.exports = {
     //Check id doesnt exist in database
     if (id) {
       await knex("user")
-        .select(["fullname", "gmail", "level"])
-        .where("id", "=", id)
+      .select(["fullname", "gmail", "level"])
+      .where("id", "=", id)
         .then((data) => {
           inforUser = data;
         });
