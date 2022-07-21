@@ -1,10 +1,37 @@
 module.exports = {
   getAllUserSchema: {
+    querystring: {
+      type: 'object',
+        properties: {
+          fullname: {
+            type: 'string',
+            maxLength: 50, minLength: 1
+          },
+          status: {
+            type: 'string',
+            maxLength: 20, minLength: 4
+          },
+          level: {
+            type: 'string',
+            maxLength: 20, minLength: 4
+          },
+          gmail: {
+            type: 'string',
+            pattern : "([a-zA-Z0-9_.-]+)@([a-zA-Z]+)([\\.])([a-zA-Z]+)"
+          }
+      }
+    },
     response: {
       200: {
         type: "object",
         properties: {
           success: { type: "boolean" },
+          totalPages: { type: "number" },
+          totalItems: { type: "number"},
+          showItemPerpage : { type: "number"},
+          currentPage : { type: "number"},
+          from : { type: "number"},
+          to : { type: "number"},
           data: { type: "array" },
           
         },

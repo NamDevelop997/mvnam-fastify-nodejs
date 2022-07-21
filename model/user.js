@@ -1,9 +1,7 @@
 const bcrypt = require("bcrypt");
 const log = require("fastify-cli/log");
 const jwt = require("jsonwebtoken");
-const nodemailer = require('nodemailer');
-
-
+const nodemailer = require("nodemailer");
 
 const optionDatabase = require("../config");
 const knex = require("knex")(optionDatabase.database);
@@ -14,6 +12,7 @@ const { default: fastify } = require("fastify");
 module.exports = {
   // Api get all users
   getAllUsers: async (req, reply) => {
+    let objwhere = {};
     let data = [];
     let getPageOnURL = paramsHelper(req.query, "page", 1);
     let getFullName = paramsHelper(req.query, "fullname", "");
@@ -21,39 +20,63 @@ module.exports = {
     let getLevel = paramsHelper(req.query, "level", "");
     let getStatus = paramsHelper(req.query, "status", "");
 
+    if (getFullName !== "") {
+      objwhere.fullname = getFullName;
+    }
+    if (getGmail !== "") {
+      objwhere.gmail = getGmail;
+    }
+
+    if (getLevel !== "") {
+      objwhere.level = getLevel;
+    }
+
+    if (getStatus !== "") {
+      objwhere.status = getStatus;
+    }
+
     if (getPageOnURL === "" || getPageOnURL < 1) getPageOnURL = 1;
 
-    let panigations = {
-      totalItems : 1,
-      itemPerpage: 15,
-      currentPage: getPageOnURL,
-      pageRanges: 5,
-
-    };
+    let totalItems = 1;
+    await knex("user")
+      .select("fullname")
+      .then((data) => {
+        totalItems = data.length;
+      });
+    let showItemPerpage = 15;
+    let currentPage = getPageOnURL;
 
     await knex("user")
       .select(["id", "fullname", "gmail", "level", "status"])
-      .limit(panigations.itemPerpage)
-      .offset((panigations.currentPage - 1) * panigations.itemPerpage)
-      .whereLike('gmail', `%${getGmail}%`)
-      .andWhereLike('fullname', `%${getFullName}%`)
-      .andWhereLike('level', `%${getLevel}%`)
-      .andWhereLike('status', `%${getStatus}%`)
-      .then((user) => {
-        data = user;
+      .limit(showItemPerpage)
+      .offset((currentPage - 1) * showItemPerpage)
+      .where(objwhere)
+      .then((users) => {
+        data = users;
+        totalItems = users.length;
+
       });
-      console.log(data.length);
-      
 
-      panigations.totalItems = data.length;
-      
-      
-
+    let totalPages = Math.ceil(totalItems / showItemPerpage);
+    let  to        = showItemPerpage * currentPage ;
+    let  from      = to - showItemPerpage +  1;
+    if (to > totalItems) to = totalItems;
+    console.log({to, from});
+    
     // Check data response
     if (data.length == 0)
       reply.status(404).send({ success: false, message: "Not found!" });
 
-    reply.send({ success: true, data });
+    reply.send({
+      success: true,
+      totalPages,
+      totalItems,
+      showItemPerpage,
+      currentPage,
+      to,
+      from,
+      data,
+    });
   },
 
   // Api get infor user
@@ -88,7 +111,7 @@ module.exports = {
   // Api add user
   add: async (req, reply) => {
     try {
-      let { fullname, gmail, password, level} = req.body;
+      let { fullname, gmail, password, level } = req.body;
       let is_gmail;
 
       let pattern = /([a-zA-Z0-9_.-]+)@([a-zA-Z]+)([\.])([a-zA-Z]+)/i;
@@ -104,7 +127,7 @@ module.exports = {
           });
         } else {
           // Token = fullname + secretKey
-          let createToken = jwt.sign({ fullname }, secretKey.secretKeyToken); 
+          let createToken = jwt.sign({ fullname }, secretKey.secretKeyToken);
           let hashPassword = await bcrypt.hash(password, 9);
           let dataUser = {
             fullname: fullname,
@@ -119,31 +142,29 @@ module.exports = {
             .insert(dataUser)
             .then(() => {
               let transporter = nodemailer.createTransport({
-                service: 'gmail',
+                service: "gmail",
                 auth: {
-                  user: 'namyoutubi997@gmail.com',
-                  pass: 'owondfzbhibxoqmf'
-                }
+                  user: "namyoutubi997@gmail.com",
+                  pass: "owondfzbhibxoqmf",
+                },
               });
-              
+
               let mailOptions = {
                 to: req.body.gmail,
-                subject: 'VERIFY EMAIL',
+                subject: "VERIFY EMAIL",
                 html: `<h1>Hi ${fullname}!</h1>
                         <p>Thank you for subscribing website my us.</p>
                         <p>Please press confirm your account</p>
-                        <a href="http://127.0.0.1:3000/verify_gmail?token=${createToken}">CLICK VERIFY YOUR EMAIL! </a>`
+                        <a href="http://127.0.0.1:3000/verify_gmail?token=${createToken}">CLICK VERIFY YOUR EMAIL! </a>`,
               };
-              
-              transporter.sendMail(mailOptions, function(error, info){
+
+              transporter.sendMail(mailOptions, function (error, info) {
                 if (error) {
-                  reply.send({error});
-                } 
+                  reply.send({ error });
+                }
               });
               reply.send({ success: true, message: "Add user successfully!" });
             });
-          
-            
         }
       } else {
         reply.send({
@@ -271,8 +292,8 @@ module.exports = {
     //Check id doesnt exist in database
     if (id) {
       await knex("user")
-      .select(["fullname", "gmail", "level"])
-      .where("id", "=", id)
+        .select(["fullname", "gmail", "level"])
+        .where("id", "=", id)
         .then((data) => {
           inforUser = data;
         });
