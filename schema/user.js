@@ -1,39 +1,42 @@
 module.exports = {
   getAllUserSchema: {
     querystring: {
-      type: 'object',
-        properties: {
-          fullname: {
-            type: 'string',
-            maxLength: 50, minLength: 1
-          },
-          status: {
-            type: 'string',
-            maxLength: 20, minLength: 4
-          },
-          level: {
-            type: 'string',
-            maxLength: 20, minLength: 4
-          },
-          gmail: {
-            type: 'string',
-            pattern : "([a-zA-Z0-9_.-]+)@([a-zA-Z]+)([\\.])([a-zA-Z]+)"
-          }
-      }
+      type      : "object",
+      properties: {
+        fullname: {
+          type      : "string",
+          maxLength : 50,
+          minLength : 1,
+        },
+        status: {
+          type      : "string",
+          maxLength : 20,
+          minLength : 4,
+        },
+        level: {
+          type      : "string",
+          maxLength : 20,
+          minLength : 4,
+        },
+        gmail: {
+          type      : "string",
+          format    : "email",
+        },
+      },
     },
     response: {
       200: {
-        type: "object",
-        properties: {
-          success: { type: "boolean" },
-          totalPages: { type: "number" },
-          totalItems: { type: "number"},
-          showItemPerpage : { type: "number"},
-          currentPage : { type: "number"},
-          from : { type: "number"},
-          to : { type: "number"},
-          data: { type: "array" },
-          
+        type       : "object",
+        properties : 
+        {
+          success         : { type: "boolean" },
+          totalPages      : { type: "number" },
+          totalItems      : { type: "number" },
+          totalItemsPerpage : { type: "number" },
+          currentPage     : { type: "number" },
+          from            : { type: "number" },
+          to              : { type: "number" },
+          data            : { type: "array" },
         },
       },
     },
@@ -41,14 +44,14 @@ module.exports = {
 
   showInforUerSchema: {
     params: {
-      id: { type: "number" },
+      id  : { type: "number" },
     },
     response: {
-      200: {
-        type: "object",
+      200   : {
+        type      : "object",
         properties: {
-          success: { type: "boolean" },
-          data: { type: "array" },
+          success : { type: "boolean" },
+          data    : { type: "array" },
         },
       },
     },
@@ -56,21 +59,26 @@ module.exports = {
 
   addUserSchema: {
     body: {
-      type: "object",
+      type    : "object",
       required: ["fullname", "gmail", "password", "level"],
       properties: {
         fullname: { type: "string", maxLength: 50, minLength: 5 }, // recall we created typeString earlier
-        gmail: { type: "string", maxLength: 50, minLength: 12 , pattern : "([a-zA-Z0-9_.-]+)@([a-zA-Z]+)([\\.])([a-zA-Z]+)",},
-        password: { type: "string", maxLength: 15, minLength: 6 },
-        level: { type: "string", maxLength: 15, minLength: 3 },
+        gmail   : {
+          type  : "string",
+          maxLength: 50,
+          minLength: 12,
+          format   : "email"
+        },
+        password   : { type: "string", maxLength: 15, minLength: 6 },
+        level      : { type: "string", maxLength: 15, minLength: 3 },
       },
     },
     response: {
       200: {
-        type: "object",
-        properties: {
-          success: { type: "boolean" },
-          message: { type: "string" },
+        type       : "object",
+        properties : {
+          success  : { type: "boolean" },
+          message  : { type: "string" },
         }, // sending a simple message as string
       },
     },
@@ -78,25 +86,25 @@ module.exports = {
 
   editUserSchema: {
     body: {
-      type: "object",
-      required: ["fullname", "gmail", "level"],
+      type      : "object",
+      required  : ["fullname", "gmail", "level"],
       properties: {
-        fullname: { type: "string", maxLength: 50, minLength: 5 }, // recall we created typeString earlier
-        gmail: { type: "string", maxLength: 50, minLength: 12 },
-        level: { type: "string", maxLength: 15, minLength: 3 },
-        status: { type: "string", maxLength: 15, minLength: 6 },
+        fullname  : { type: "string", maxLength: 50, minLength: 5 }, // recall we created typeString earlier
+        gmail     : { type: "string", maxLength: 50, minLength: 12, format: "email" }, // recall we created typeString earlier
+        level     : { type: "string", maxLength: 15, minLength: 3 },
+        status    : { type: "string", maxLength: 15, minLength: 6 },
       },
     },
-    params: {
-      id: { type: "number" }, // converts the id param to number
+    params  : {
+        id  : { type: "number" }, // converts the id param to number
     },
     response: {
       200: {
         // sending a simple message as string
-        type: "object",
+        type      : "object",
         properties: {
-          success: { type: "boolean" },
-          msg: { type: "string" },
+        success   : { type: "boolean" },
+        msg       : { type: "string" },
         },
       },
     },
@@ -104,24 +112,24 @@ module.exports = {
 
   editPassword: {
     body: {
-      type: "object",
-      required: ["password_old", "password_new", "password_confirm"],
-      properties: {
-        password_old: { type: "string", maxLength: 15, minLength: 6 },
-        password_new: { type: "string", maxLength: 15, minLength: 6 },
+      type        : "object",
+      required    : ["password_old", "password_new", "password_confirm"],
+      properties  : {
+        password_old    : { type: "string", maxLength: 15, minLength: 6 },
+        password_new    : { type: "string", maxLength: 15, minLength: 6 },
         password_confirm: { type: "string", maxLength: 15, minLength: 6 },
       },
     },
-    params: {
-      id: { type: "number" }, // converts the id param to number
+    params  : {
+      id    : { type: "number" }, // converts the id param to number
     },
     response: {
-      200: {
+      200   : {
         // sending a simple message as string
-        type: "object",
+        type      : "object",
         properties: {
-          success: { type: "boolean" },
-          message: { type: "string" },
+          success   : { type: "boolean" },
+          message   : { type: "string" },
         },
       },
     },
@@ -129,14 +137,14 @@ module.exports = {
 
   deleteUserSchema: {
     params: {
-      id: { type: "number" }, // converts the id param to number
+      id  : { type: "number" }, // converts the id param to number
     },
     response: {
-      200: {
-        type: "object",
+      200   : {
+        type      : "object",
         properties: {
-          success: { type: "boolean" },
-          msg: { type: "string" },
+          success : { type: "boolean" },
+          msg     : { type: "string" },
         },
       },
     },
@@ -144,17 +152,17 @@ module.exports = {
 
   forgotPassword: {
     body: {
-      type: "object",
-      required: ["gmail"],
+      type      : "object",
+      required  : ["gmail"],
       properties: {
-        gmail: { type: "string", maxLength: 50, minLength: 12 },
+        gmail   : { type: "string", maxLength: 50, minLength: 12 },
         response: {
-          200: {
+          200   : {
             // sending a simple message as string
             type: "object",
             properties: {
-              success: { type: "boolean" },
-              message: { type: "string" },
+              success : { type: "boolean" },
+              message : { type: "string" },
             },
           },
         },

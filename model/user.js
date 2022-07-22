@@ -12,57 +12,69 @@ const { default: fastify } = require("fastify");
 module.exports = {
   // Api get all users
   getAllUsers: async (req, reply) => {
-    let objwhere = {};
+    
     let data = [];
     let getPageOnURL = paramsHelper(req.query, "page", 1);
-    let getFullName = paramsHelper(req.query, "fullname", "");
-    let getGmail = paramsHelper(req.query, "gmail", "");
-    let getLevel = paramsHelper(req.query, "level", "");
-    let getStatus = paramsHelper(req.query, "status", "");
-
-    if (getFullName !== "") {
-      objwhere.fullname = getFullName;
-    }
-    if (getGmail !== "") {
-      objwhere.gmail = getGmail;
-    }
-
-    if (getLevel !== "") {
-      objwhere.level = getLevel;
-    }
-
-    if (getStatus !== "") {
-      objwhere.status = getStatus;
-    }
+    let getFullName  = paramsHelper(req.query, "fullname", "");
+    let getGmail     = paramsHelper(req.query, "gmail", "");
+    let getLevel     = paramsHelper(req.query, "level", "");
+    let getStatus    = paramsHelper(req.query, "status", "");
 
     if (getPageOnURL === "" || getPageOnURL < 1) getPageOnURL = 1;
-
-    let totalItems = 1;
-    await knex("user")
-      .select("fullname")
-      .then((data) => {
-        totalItems = data.length;
-      });
-    let showItemPerpage = 15;
-    let currentPage = getPageOnURL;
-
-    await knex("user")
+    let showItemPerpage = 10;
+    let currentPage     = getPageOnURL;
+    let totalPages      = 1;
+    let from            = 1;
+    let to              = 1;
+    let totalItems      = 1;
+    await knex("user").select('fullname').then((data) => { totalItems = data.length;});
+  
+    
+    let itemsAfterFilter = 1;
+    if (getFullName == "" && getFullName == "" &&   getFullName == ""&& getGmail == "" && getLevel == "" && getStatus == "") {
+      await knex("user")
       .select(["id", "fullname", "gmail", "level", "status"])
       .limit(showItemPerpage)
       .offset((currentPage - 1) * showItemPerpage)
-      .where(objwhere)
       .then((users) => {
         data = users;
-        totalItems = users.length;
-
+        itemsAfterFilter = totalItems;
+        totalPages = Math.ceil(itemsAfterFilter / showItemPerpage);
+        from = (showItemPerpage * currentPage)- showItemPerpage + 1;
+        to = showItemPerpage * currentPage;
       });
+    }else{
+        await knex("user")
+              .select(["id", "fullname", "gmail", "level", "status"])
+              .where((filter) => {
+                  if (getFullName ) {
+                    filter.whereLike("fullname", `%${getFullName}%`);
+                  }
 
-    let totalPages = Math.ceil(totalItems / showItemPerpage);
-    let  to        = showItemPerpage * currentPage ;
-    let  from      = to - showItemPerpage +  1;
-    if (to > totalItems) to = totalItems;
-    console.log({to, from});
+                  if (getGmail ) {
+                    filter.whereLike("gmail", `%${getGmail}%`);
+                  }
+
+                  if (getLevel ) {
+                    filter.whereLike("level", getLevel);
+                  }
+
+                  if (getStatus) {
+                    filter.whereLike("status", getStatus);
+                  }
+              })
+              .then((users) => {
+                data = users;
+                  totalItems = users.length;
+                  totalPages = Math.ceil(totalItems / showItemPerpage);
+                  from = (showItemPerpage * currentPage)- showItemPerpage + 1;
+                  to   = showItemPerpage * currentPage;
+              })
+              
+            }
     
+    if (to > totalItems ) to  = totalItems;
+
     // Check data response
     if (data.length == 0)
       reply.status(404).send({ success: false, message: "Not found!" });
